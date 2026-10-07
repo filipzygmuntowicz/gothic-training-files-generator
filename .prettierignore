@@ -1,0 +1,8 @@
+node_modules
+dist
+src/data
+src/merged_voices
+src/Polish_ogg
+src/train_txts
+src/train_txts_old_and_bad
+src/laughing_lines*.json
