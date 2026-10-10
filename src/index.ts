@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import { join } from "node:path";
-import { parseDatFile } from "./parseDatFiles";
+import { parseDatFile, parseDatFileProperly } from "./parseDatFiles";
 import { updateModelToLinesWithRefs } from "./modelToLinesWithRefs";
 
 type Line = {
@@ -8,7 +8,7 @@ type Line = {
   pl: string;
 };
 type OwnerToLines = Record<string, Line[]>;
-type Script = { isPlayer: boolean; scriptId: string; text: string };
+type Script = { isPlayer: boolean; scriptId: string; text: string; owner: string };
 export const mainWorkingDirectory = "E:\\CC\\g3_dubbing\\g1_g2_kroniki_training_files_parser\\src";
 const allGames = ["g1", "g2", "nk", "g3", "km"] as ["g1", "g2", "nk", "g3", "km"];
 
@@ -33,52 +33,59 @@ const getTrainingFiles = (game: "g1" | "g2" | "nk" | "g3" | "km") => {
       ) as OwnerToLines;
     }
     const playerName = game === "km" ? "Marvin" : "Player_PC_Hero";
-    const ownerReplaces: Record<string, string> = JSON.parse(
+    const ownerReplacesRaw: Record<string, string> = JSON.parse(
       fs.readFileSync(join(gameFilePaths, "ownerReplaces.json"), "utf8")
     );
-
+    const ownerReplaces: Record<string, string> = {};
+    Object.entries(ownerReplacesRaw).forEach(([owner, replace]) => {
+      ownerReplaces[owner.toLowerCase()] = replace;
+    });
     const ownerToLines: OwnerToLines = {};
     const capitalize = (s: string) => {
       return s.charAt(0).toUpperCase() + s.slice(1);
     };
     const assignLineFromScript = (l: Script) => {
       const filename = `${l.scriptId}.WAV`.toLowerCase();
-      let replacedFName = filename.replace(
-        /^(b_|dia_addon_|dia_|info_|org_|vlk_|tpl_|stt_|sdl_|sit_|sld_|pc_|nov_|mis_|kdw_|kdf_|grd_)/,
-        ""
-      );
-      if (!replacedFName.includes("nagur")) {
-        replacedFName = replacedFName.replace("gur_", "");
-      }
-      const owner_candidate = capitalize(l.isPlayer ? playerName : replacedFName.split("_")[0]);
+      // let replacedFName = filename.replace(
+      //   /^(b_|dia_addon_|dia_|info_|org_|vlk_|tpl_|stt_|sdl_|sit_|sld_|pc_|nov_|mis_|kdw_|kdf_|grd_)/,
+      //   ""
+      // );
+      // if (!replacedFName.includes("nagur")) {
+      //   replacedFName = replacedFName.replace("gur_", "");
+      // }
+      //const owner_candidate = capitalize(l.isPlayer ? playerName : replacedFName.split("_")[0]);
+      const owner_candidate = l.isPlayer ? playerName : l.owner;
       let owner = capitalize(
-        (ownerReplaces[owner_candidate]
-          ? ownerReplaces[owner_candidate]
+        (ownerReplaces[owner_candidate.toLowerCase()]
+          ? ownerReplaces[owner_candidate.toLowerCase()]
           : owner_candidate
         ).toLowerCase()
       );
-      if (owner.toLowerCase() === "lord") {
-        if (filename.includes("lord_hagen")) {
-          owner = "Hagen";
-        }
-      }
-      let fname_dia = replacedFName;
-      while (owner === "Dia") {
-        fname_dia = fname_dia.replace("dia_", "");
-        owner = fname_dia.split("_")[0];
-      }
-      let fname_number = replacedFName;
-      while (!Number.isNaN(Number(owner))) {
-        fname_number = fname_number.replace(`${owner}_`, "");
-        owner = fname_number.split("_")[0];
-      }
-      if (owner === "B") {
-        owner = "Npc";
-      }
-      owner = capitalize(owner);
-      owner = capitalize((ownerReplaces[owner] ? ownerReplaces[owner] : owner).toLowerCase());
+      // if (owner.toLowerCase() === "lord") {
+      //   if (filename.includes("lord_hagen")) {
+      //     owner = "Hagen";
+      //   }
+      // }
+      // let fname_dia = replacedFName;
+      // while (owner === "Dia") {
+      //   fname_dia = fname_dia.replace("dia_", "");
+      //   owner = fname_dia.split("_")[0];
+      // }
+      // let fname_number = replacedFName;
+      // while (!Number.isNaN(Number(owner))) {
+      //   fname_number = fname_number.replace(`${owner}_`, "");
+      //   owner = fname_number.split("_")[0];
+      // }
+      // if (owner === "B") {
+      //   owner = "Npc";
+      // }
+      // owner = capitalize(owner);
+      // owner = capitalize((ownerReplaces[owner] ? ownerReplaces[owner] : owner).toLowerCase());
       const arr = ownerToLines[owner] ? ownerToLines[owner] : [];
-      ownerToLines[owner.replace("Djg", "").replace("djg", "")] = arr.concat([
+      ownerToLines[
+        owner
+        //.replace("Djg", "").replace("djg", "")
+      ] = arr.concat([
         {
           filename,
           pl: l.text,
@@ -126,7 +133,7 @@ const getTrainingFiles = (game: "g1" | "g2" | "nk" | "g3" | "km") => {
       });
     });
   };
-  moveFiles();
+  //moveFiles();
   const ownerToNumberOfLines: Record<string, number> = {};
   Object.entries(ownerToLines)
     .map(([o, l]) => ({ o, l }))
@@ -297,20 +304,9 @@ const getSpeechMerged = () => {
   });
 };
 
-//parseDatFile();
-//allGames.forEach((game) => getTrainingFiles(game));
-//getTrainingFiles("km");
-//getTrainingData();
-//splitOwnerInOwnerToLines();
-getOwnerToNumberOfLinesMerged();
-getOwnerToLinesMerged();
-
 const ownerToLinesMerged: OwnerToLines = JSON.parse(
   fs.readFileSync(join(mainWorkingDirectory, "ownerToLinesMerged.json"), "utf-8")
 );
-
-//updateModelToLinesWithRefs(ownerToLinesMerged);
-//getSpeechMerged();
 
 const getGeneralModelTrainingData = () => {
   const saveFolder = join(join(mainWorkingDirectory, "GeneralModelWithEveryone"), "raws");
@@ -353,4 +349,75 @@ const getGeneralModelTrainingData = () => {
   );
 };
 
-getGeneralModelTrainingData();
+const getOwnerReplaces = (game: "g1" | "g2" | "nk" | "km" | "g3") => {
+  if (game === "g3") return;
+  const gameDirectory = join(mainWorkingDirectory, game);
+  const newNumberOfLines: OwnerToNumberOfLines = JSON.parse(
+    fs.readFileSync(join(gameDirectory, "ownerToNumberOfLinesFromScripts.json"), "utf-8")
+  );
+  const oldNumberOfLines: OwnerToNumberOfLines = JSON.parse(
+    fs.readFileSync(join(join(gameDirectory, "copies"), "ownerToNumberOfLines.json"), "utf-8")
+  );
+  const ownerReplaces: Record<string, string> = {};
+  Object.keys(oldNumberOfLines).forEach((oldOwner) => {
+    Object.keys(newNumberOfLines).forEach((newOwner) => {
+      if (newOwner.toLowerCase().includes(oldOwner.toLowerCase())) {
+        if (ownerReplaces[newOwner]) {
+          //console.log(ownerReplaces[newOwner]);
+        }
+        if (newOwner.toLowerCase().includes("baloro") && oldOwner.toLowerCase() === "balor") {
+          return;
+        }
+        if (newOwner.toLowerCase().includes("killian") && oldOwner.toLowerCase() === "ian") {
+          return;
+        }
+        if (newOwner.toLowerCase().includes("dragon") && oldOwner.toLowerCase() === "agon") {
+          return;
+        }
+        if (newOwner.toLowerCase().includes("tomas") && oldOwner.toLowerCase() === "tom") {
+          return;
+        }
+        if (newOwner.toLowerCase().includes("fredrik") && oldOwner.toLowerCase() === "fred") {
+          return;
+        }
+        if (newOwner.toLowerCase().includes("garnek") && oldOwner.toLowerCase() === "nek") {
+          return;
+        }
+        if (newOwner.toLowerCase().includes("vladan") && oldOwner.toLowerCase() === "dan") {
+          return;
+        }
+        if (newOwner.toLowerCase().includes("alfred") && oldOwner.toLowerCase() === "alf") {
+          return;
+        }
+        if (newOwner.toLowerCase().includes("danis") && oldOwner.toLowerCase() === "dan") {
+          return;
+        }
+        if (newOwner.toLowerCase().includes("daniel") && oldOwner.toLowerCase() === "dan") {
+          return;
+        }
+        if (newOwner.toLowerCase().includes("renegade") && oldOwner.toLowerCase() === "rene") {
+          return;
+        }
+         if (newOwner.toLowerCase().includes("piratetrader") && oldOwner.toLowerCase() === "trader") {
+          return;
+         }
+        ownerReplaces[newOwner.toLowerCase()] = oldOwner;
+      }
+    });
+  });
+  fs.writeFileSync(
+    join(gameDirectory, "ownerReplaces.json"),
+    JSON.stringify(ownerReplaces),
+    "utf-8"
+  );
+};
+["g1", "g2", "nk", "km"].forEach((game) => getTrainingFiles(game));
+
+//getTrainingData();
+//splitOwnerInOwnerToLines();
+//getOwnerToNumberOfLinesMerged();
+//getOwnerToLinesMerged();
+//updateModelToLinesWithRefs(ownerToLinesMerged);
+//getSpeechMerged();
+//getGeneralModelTrainingData();
+//parseDatFileProperly();
