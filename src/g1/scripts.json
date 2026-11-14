@@ -13819,12 +13819,6 @@
     "owner": "pc_psionic"
   },
   {
-    "isPlayer": false,
-    "scriptId": "DIA_Fingers_BecomeShadow_05_01",
-    "text": "I co z tego?",
-    "owner": "pc_psionic"
-  },
-  {
     "isPlayer": true,
     "scriptId": "Info_Xardas_KDW_15_01",
     "text": "Wszyscy Magowie Ognia zginęli!",

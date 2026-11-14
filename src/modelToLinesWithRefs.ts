@@ -1,6 +1,8 @@
 import * as fs from "node:fs";
+import { join } from "node:path";
+import { mainWorkingDirectory } from "./typesAndReads";
 
-const filesToGenerateWorkingPath = "E:\\CC\\g3_dubbing\\unpackedG3Files\\RingsOfWaterFiles";
+const filesToGenerateWorkingPath = "E:\\CC\\g3_dubbing\\modPackFiles";
 const voiceToDialoguePath = `${filesToGenerateWorkingPath}\\voiceToDialogues.json`;
 const uniqueNpcToModelPath = `${filesToGenerateWorkingPath}\\uniqueNpcToModel.json`;
 const voiceToModelPath = `${filesToGenerateWorkingPath}\\voiceToModel.json`;
@@ -138,5 +140,9 @@ export const updateModelToLinesWithRefs = (
     });
   });
 
-  fs.writeFileSync("modelToLinesWithRefs.json", JSON.stringify(modelToLinesWithRefs), "utf-8");
+  fs.writeFileSync(
+    join(mainWorkingDirectory, "modelToLinesWithRefs.json"),
+    JSON.stringify(modelToLinesWithRefs),
+    "utf-8"
+  );
 };

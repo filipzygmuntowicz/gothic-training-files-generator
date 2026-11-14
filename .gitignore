@@ -193,6 +193,7 @@ vite.config.ts.timestamp-*
 .turbo
 
 *.wav
+*.ogg
 src/data
 *.DAT
 *.exe
@@ -213,3 +214,4 @@ src/km/ownerToLines.json
 src/km/ownerToNumberOfLines.json
 
 src/g3/ownerToNumberOfLines.json
+src/traning_data_one_model
