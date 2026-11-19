@@ -7,7 +7,14 @@ import {
   getOwnerToLinesMerged as updateOwnerToLinesMerged,
   getOwnerToNumberOfLinesMerged,
 } from "./getOwnerToLinesScripts";
-import { Game, mainWorkingDirectory, ownerToLinesMerged } from "./typesAndReads";
+import {
+  allGames,
+  Game,
+  mainWorkingDirectory,
+  modelsInfo,
+  OwnerToLines,
+  ownerToLinesMerged,
+} from "./typesAndReads";
 import { updateRemakeScripts } from "./getRemakeScripts";
 import { getSpeechMerged } from "./getSpeechMerged";
 import { getTrainingData, getTrainingDataForModelInfoPair } from "./getTrainingData";
@@ -18,7 +25,7 @@ import { getTrainingData, getTrainingDataForModelInfoPair } from "./getTrainingD
 //getTrainingFiles("g3");
 //splitOwnerInOwnerToLines();
 //getOwnerToNumberOfLinesMerged();
-//updateOwnerToLinesMerged();
+updateOwnerToLinesMerged();
 updateModelToLinesWithRefs(ownerToLinesMerged);
 
 //getGeneralModelTrainingData();
@@ -44,4 +51,14 @@ const getTrainingDataForOneModel = (model: string, games: Game[]) => {
   );
 };
 
-//getTrainingDataForOneModel("Markus", ["km"]);
+//getTrainingDataForOneModel("Player_pc_hero", ["g1", "g2", "g3"]);
+// const filesToGenerateWorkingPath = "E:\\CC\\g3_dubbing\\modPackFiles";
+// const uniqueNpcToModelPath = `${filesToGenerateWorkingPath}\\uniqueNpcToModel.json`;
+// const uniqueNpcToModel: Record<string, string> = JSON.parse(
+//   fs.readFileSync(uniqueNpcToModelPath, "utf-8")
+// );
+// Object.entries(uniqueNpcToModel).forEach(([npc, model]) => {
+//   if (modelsInfo[model] === undefined) {
+//     console.log(`"${model}": [{ "game": "km" }]`);
+//   }
+// });

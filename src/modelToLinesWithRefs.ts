@@ -77,7 +77,7 @@ const findSimillarLine = (line: string, trainingLines: TrainingLine[], owner: st
         }
       }
     });
-    const lettersLengthScore = getLengthsScore(line, tL.pl, 10);
+    const lettersLengthScore = getLengthsScore(line, tL.pl, 5);
     score -= lettersLengthScore;
     return {
       ...tL,
